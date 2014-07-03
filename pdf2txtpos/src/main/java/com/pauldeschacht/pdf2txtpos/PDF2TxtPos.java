@@ -190,12 +190,15 @@ public class PDF2TxtPos {
                 }
 
                 final String sep=";";
-                
-                for (WordPosition word : words) {
-                    txtposWriter.write(Integer.toString(pageNb) + sep);
-                    txtposWriter.write(Integer.toString(word.getLineNb()) + sep);
-                    txtposWriter.write(word.toString(sep));
-                    txtposWriter.write("\n");
+                for(Map.Entry<Integer,List<WordPosition>> kv: lines.entrySet()) {
+                    List<WordPosition> line = kv.getValue();
+                    
+                    for (WordPosition word : line) {
+                        txtposWriter.write(Integer.toString(pageNb) + sep);
+                        txtposWriter.write(Integer.toString(word.getLineNb()) + sep);
+                        txtposWriter.write(word.toString(sep));
+                        txtposWriter.write("\n");
+                    }
                 }
                 txtposWriter.flush();
             }
