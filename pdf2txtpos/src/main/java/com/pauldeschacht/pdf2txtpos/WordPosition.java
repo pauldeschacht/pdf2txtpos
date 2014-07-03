@@ -32,7 +32,7 @@ public class WordPosition
     public boolean isNumber() {
         for(int i=0; i<_word.length(); i++) {
             char c = _word.charAt(i);
-            if (c < '0' && c > '9' && c != ',' && c != '.' && c != ' ') {
+            if ((c < '0' || c > '9') && (c != ',' && c != '.' && c != ' ')) {
                 return false;
             }
         }
@@ -95,7 +95,10 @@ public class WordPosition
     }
     public String toString(String sep) 
     {
-	return Float.toString(_x1) + sep + 
+	return _fontName + sep +
+            _fontSize + sep + 
+            _spaceWidth + sep + 
+Float.toString(_x1) + sep + 
                 Float.toString(_x2) + sep + 
                 Float.toString(_y1) + sep + 
                 Float.toString(_y2) + sep + 
