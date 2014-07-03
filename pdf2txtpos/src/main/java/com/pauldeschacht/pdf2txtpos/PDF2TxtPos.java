@@ -26,8 +26,6 @@ public class PDF2TxtPos {
     protected static int endPage = -1;
     protected static float lineMargin = 1.5f; //should be based on the height of the font
     
-    
-
     private PDF2TxtPos() {
     };
 
@@ -62,16 +60,11 @@ public class PDF2TxtPos {
         options.addOption("h", "height",    true, "height of a line (only needed for fine tuning");
         options.addOption("b", "bottom",    true, "delta bottom line (only needed for fine tuning");
 
-        for(String s:args) {
-            System.out.println(s);
-        }
-        
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse( options, args);
         
         String tmp = cmd.getOptionValue("h");
         if (tmp != null) {
-            System.out.println("Height: " + tmp);
             lineMargin = Float.parseFloat(tmp);
         }
         tmp = cmd.getOptionValue("s");
@@ -89,7 +82,6 @@ public class PDF2TxtPos {
         }
         else {
             WordPositionComparator.DELTA=0.00001f;
-
         }
         
         String filename = cmd.getOptionValue("f");
@@ -196,11 +188,13 @@ public class PDF2TxtPos {
                         }
                     }
                 }
+
+                final String sep=";";
                 
                 for (WordPosition word : words) {
-                    txtposWriter.write(Integer.toString(pageNb) + ";");
-                    txtposWriter.write(Integer.toString(word.getLineNb()) + ";");
-                    txtposWriter.write(word.toString());
+                    txtposWriter.write(Integer.toString(pageNb) + sep);
+                    txtposWriter.write(Integer.toString(word.getLineNb()) + sep);
+                    txtposWriter.write(word.toString(sep));
                     txtposWriter.write("\n");
                 }
                 txtposWriter.flush();
