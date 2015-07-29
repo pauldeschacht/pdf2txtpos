@@ -12,6 +12,8 @@ public class WordPosition
     protected PDFont _font;
     protected float _spaceWidth;
     
+    protected float _dir;
+    
     public int _clusterRef[] = new int[4];
     /*
      * 0 RIGHT ALIGNED
@@ -23,6 +25,7 @@ public class WordPosition
     public WordPosition() {
 	_word = null;
         _lineNb = -1;
+        _dir = 0.0f;
         
         for(int i=0;i<4;i++) {
             _clusterRef[i] = -1;
@@ -42,7 +45,7 @@ public class WordPosition
     public void setWord(String word) {
 	_word = word;
     }
-
+    
     public String word() { return _word; }
 
     public float x1() { return _x1; }
@@ -51,10 +54,10 @@ public class WordPosition
     public float y2() { return _y2; }
 
     public void setRectangle(float x1, float y1, float x2, float y2 ) {
-	_x1 = x1;
-	_y1 = y1;
-	_x2 = x2;
-	_y2 = y2;  
+	_x1 = Math.min(x1,x2);
+	_y1 = Math.min(y1,y2);
+	_x2 = Math.max(x1,x2);
+	_y2 = Math.max(y1,y2);
     }
     
     public void trimSpaces() {
@@ -109,5 +112,12 @@ Float.toString(_x1) + sep +
         _word = _word + " " + other.word();
         _x1 = Math.min(_x1, other.x1());
         _x2 = Math.max(_x2, other.x2());
+    }
+    
+    public void setDir(float d) {
+        _dir = d;
+    }
+    public float getDir() {
+        return _dir;
     }
 }

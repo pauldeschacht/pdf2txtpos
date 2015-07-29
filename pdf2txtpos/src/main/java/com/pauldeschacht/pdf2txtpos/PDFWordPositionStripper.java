@@ -403,16 +403,16 @@ public class PDFWordPositionStripper extends PDFTextStripper
 
 	if(position == null) {
 	    WordPosition wp = new WordPosition();
-	    wp.setRectangle(positionX, positionY, positionX + positionWidth, positionY - positionHeight);
+            wp.setRectangle(positionX, positionY, positionX + positionWidth, positionY - positionHeight);
 	    return wp;
 	}
 	/* If we are sorting, then we need to use the text direction
 	 * adjusted coordinates, because they were used in the sorting. */
 	if (getSortByPosition()) {
-	    positionX = position.getXDirAdj();
-	    positionY = position.getYDirAdj();
-	    positionWidth = position.getWidthDirAdj();
-	    positionHeight = position.getHeightDir();
+            positionX = position.getXDirAdj();
+            positionY = position.getYDirAdj();
+            positionWidth = position.getWidthDirAdj();
+            positionHeight = position.getHeightDir();
 	}
 	else {
 	    positionX = position.getX();
@@ -421,7 +421,8 @@ public class PDFWordPositionStripper extends PDFTextStripper
 	    positionHeight = position.getHeight();
 	}
 	WordPosition wp = new WordPosition();
-	wp.setRectangle(positionX, positionY - positionHeight, positionX + positionWidth, positionY);
+        wp.setRectangle(positionX, positionY, positionX + positionWidth, positionY + positionHeight);
+        wp.setDir(position.getDir());
 	return wp;
     }
  
@@ -445,7 +446,7 @@ public class PDFWordPositionStripper extends PDFTextStripper
             int numberOfPositions = line.size();
             for(int i = numberOfPositions-1;i>=0;i--)
             {
-                TextPosition text = line.get(i);
+                TextPosition text = line.get(i);             
                 if (text instanceof WordSeparator || text.getCharacter().endsWith(" ")==true) 
                 {
 		    String s = normalize.normalizePres(lineBuilder.toString());
@@ -460,9 +461,12 @@ public class PDFWordPositionStripper extends PDFTextStripper
 			wordPosition.setWord(s);
 			wordPosition.setRectangle(firstWordPosition.x1(), firstWordPosition.y1(),
 						  lastWordPosition.x2(), lastWordPosition.y2());
-                    wordPosition.setSpaceWidth(getSpaceWidthForFont(firstTextPosition.getFont(), firstTextPosition.getFontSize()));
+                        wordPosition.setSpaceWidth(getSpaceWidthForFont(firstTextPosition.getFont(), firstTextPosition.getFontSize()));
                         wordPosition.trimSpaces();
-			_wordPositions.add(wordPosition);
+                        if (firstWordPosition.getDir() == 0) {                    
+                            _wordPositions.add(wordPosition);
+                        }
+
 		    }
 		    firstTextPosition = null;
 		    lastTextPosition = null;
@@ -488,8 +492,10 @@ public class PDFWordPositionStripper extends PDFTextStripper
 		    wordPosition.setRectangle(firstWordPosition.x1(), firstWordPosition.y1(),
 					      lastWordPosition.x2(), lastWordPosition.y2());
                     wordPosition.setSpaceWidth(getSpaceWidthForFont(firstTextPosition.getFont(), firstTextPosition.getFontSize()));
-                        wordPosition.trimSpaces();
-		    _wordPositions.add(wordPosition);
+                    wordPosition.trimSpaces();
+                    if (firstWordPosition.getDir() == 0) {                    
+                        _wordPositions.add(wordPosition);
+                    }
 		}
 		firstTextPosition = null;
 		lastTextPosition = null;
@@ -512,11 +518,13 @@ public class PDFWordPositionStripper extends PDFTextStripper
 			wordPosition.setWord(s);
 			wordPosition.setRectangle(firstWordPosition.x1(), firstWordPosition.y1(),
 						  lastWordPosition.x2(), lastWordPosition.y2());
-                                            wordPosition.fontName(firstTextPosition.getFont().getBaseFont());
+                        wordPosition.fontName(firstTextPosition.getFont().getBaseFont());
                         wordPosition.fontSize(firstTextPosition.getFontSize());
-                    wordPosition.setSpaceWidth(getSpaceWidthForFont(firstTextPosition.getFont(), firstTextPosition.getFontSize()));
+                        wordPosition.setSpaceWidth(getSpaceWidthForFont(firstTextPosition.getFont(), firstTextPosition.getFontSize()));
                         wordPosition.trimSpaces();
-			_wordPositions.add(wordPosition);
+                        if (firstWordPosition.getDir() == 0) {                    
+                            _wordPositions.add(wordPosition);
+                        }
 		    }
 		    firstTextPosition = null;
 		    lastTextPosition = null;
@@ -546,8 +554,10 @@ public class PDFWordPositionStripper extends PDFTextStripper
                     wordPosition.fontSize(firstTextPosition.getFontSize());
                     wordPosition.setPDFont(firstTextPosition.getFont());
                     wordPosition.setSpaceWidth(getSpaceWidthForFont(firstTextPosition.getFont(), firstTextPosition.getFontSize()));
-                        wordPosition.trimSpaces();
-		    _wordPositions.add(wordPosition);
+                    wordPosition.trimSpaces();
+                    if (firstWordPosition.getDir() == 0) {                    
+                        _wordPositions.add(wordPosition);
+                    }
 		}
 		firstTextPosition = null;
 		lastTextPosition = null;
