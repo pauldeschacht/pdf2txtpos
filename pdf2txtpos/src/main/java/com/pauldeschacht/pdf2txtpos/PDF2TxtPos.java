@@ -144,6 +144,9 @@ public class PDF2TxtPos {
                 //sort on bottom line of each bounding box 
                 //and assign a line number based on that bottom line
                 Collections.sort(words, new WordPositionComparator());
+                if (words.size() == 0) {
+                  continue;
+                }
                 float lineY = words.get(0).y1();
                 int lineNb = 0;
                 for (WordPosition word : words) {
