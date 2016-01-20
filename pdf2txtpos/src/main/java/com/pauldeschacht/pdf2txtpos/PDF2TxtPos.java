@@ -17,6 +17,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 
 public class PDF2TxtPos {
 
@@ -59,6 +60,7 @@ public class PDF2TxtPos {
         options.addOption("e", "end",       true, "end page");
         options.addOption("h", "height",    true, "height of a line (only needed for fine tuning");
         options.addOption("b", "bottom",    true, "delta bottom line (only needed for fine tuning");
+        options.addOption("v", "vlines",    false, "use vertical lines to create the csv file ");
 
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse( options, args);
@@ -84,11 +86,18 @@ public class PDF2TxtPos {
             WordPositionComparator.DELTA=0.00001f;
         }
         
+        boolean bVerticalLines = false;
+        //tmp = cmd.getOptionValue("v");
+        //if (tmp != null) {
+        if (cmd.hasOption("v")) {
+            bVerticalLines = true;
+        }
+        
         String filename = cmd.getOptionValue("f");
         if (filename != null) {
             File file = new File(filename);
             if (file.isFile() && file.getName().endsWith(".pdf")) {
-                parseFile(file.getAbsolutePath());
+                parseFile(file.getAbsolutePath(), bVerticalLines);
             }
         }
         else {
@@ -98,7 +107,7 @@ public class PDF2TxtPos {
                 File[] files = new File(dir).listFiles();
                 for (File file : files) {
                     if (file.isFile() && file.getName().endsWith(".pdf")) {
-                        parseFile(file.getAbsolutePath());
+                        parseFile(file.getAbsolutePath(), bVerticalLines);
                     }
                 }
             }
@@ -108,7 +117,8 @@ public class PDF2TxtPos {
         }
     }
 
-    protected static void parseFile(String pdfFile) throws Exception {
+    protected static void parseFile(String pdfFile, boolean bVerticalLines) throws Exception {
+        
         String baseFilename = pdfFile.substring(0, pdfFile.lastIndexOf('.'));
         String txtposFilename = baseFilename + ".info";
         File txtposFile = new File(txtposFilename);
@@ -117,6 +127,16 @@ public class PDF2TxtPos {
         }
         FileWriter txtposFW = new FileWriter(txtposFile.getAbsoluteFile());
         BufferedWriter txtposWriter = new BufferedWriter(txtposFW);
+        
+        String gridFilename = baseFilename + ".csv";
+        File gridFile = new File(gridFilename);
+        if (!gridFile.exists()) {
+            gridFile.createNewFile();
+        }
+        FileWriter gridFW = new FileWriter(gridFile.getAbsoluteFile());
+        BufferedWriter gridWriter = new BufferedWriter(gridFW);
+        
+        
 
         LOG.info("Processing file " + pdfFile);
         
@@ -191,7 +211,6 @@ public class PDF2TxtPos {
                         }
                     }
                 }
-
                 final String sep=";";
                 for(Map.Entry<Integer,List<WordPosition>> kv: lines.entrySet()) {
                     List<WordPosition> line = kv.getValue();
@@ -204,6 +223,31 @@ public class PDF2TxtPos {
                     }
                 }
                 txtposWriter.flush();
+                
+                // GRID approach
+                //String baseFilename = pdfFile.substring(0, pdfFile.lastIndexOf('.'));
+                PageGridDrawer gridDrawer = new PageGridDrawer();
+                PDPage page = (PDPage)pages.get(pageNb-1);
+                gridDrawer.drawPage(page);
+                
+                List<WordPosition> ll = new ArrayList<WordPosition>();
+                for(Map.Entry<Integer,List<WordPosition>> kv: lines.entrySet()) {
+                    List<WordPosition> line = kv.getValue();
+                    for(WordPosition wp: line) {
+                        ll.add(wp);
+                    }
+                }
+                List<Grid> grids = gridDrawer.getGrids();
+                for(Grid g : grids) {
+                    String[][] csv = g.csv(ll,bVerticalLines);
+                    for (String[] row : csv) {
+                        for (String s : row) {
+                            gridWriter.write(s + ";");
+                        }
+                        gridWriter.write("\n");   
+                    }
+                }
+                gridWriter.flush();
             }
         }
         catch (IOException e) {
