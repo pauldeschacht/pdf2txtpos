@@ -61,6 +61,7 @@ public class PDF2TxtPos {
         options.addOption("h", "height",    true, "height of a line (only needed for fine tuning");
         options.addOption("b", "bottom",    true, "delta bottom line (only needed for fine tuning");
         options.addOption("v", "vlines",    false, "use vertical lines to create the csv file ");
+        options.addOption("c", "sep",       true, "separator for the csv lines (only with vlines) ");
 
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse( options, args);
@@ -87,17 +88,21 @@ public class PDF2TxtPos {
         }
         
         boolean bVerticalLines = false;
-        //tmp = cmd.getOptionValue("v");
-        //if (tmp != null) {
+        String separator = ";";
         if (cmd.hasOption("v")) {
             bVerticalLines = true;
+            tmp = cmd.getOptionValue("c");
+            if (tmp != null) {
+                separator = tmp;
+            }
+            
         }
         
         String filename = cmd.getOptionValue("f");
         if (filename != null) {
             File file = new File(filename);
             if (file.isFile() && file.getName().endsWith(".pdf")) {
-                parseFile(file.getAbsolutePath(), bVerticalLines);
+                parseFile(file.getAbsolutePath(), bVerticalLines, separator);
             }
         }
         else {
@@ -107,7 +112,7 @@ public class PDF2TxtPos {
                 File[] files = new File(dir).listFiles();
                 for (File file : files) {
                     if (file.isFile() && file.getName().endsWith(".pdf")) {
-                        parseFile(file.getAbsolutePath(), bVerticalLines);
+                        parseFile(file.getAbsolutePath(), bVerticalLines, separator);
                     }
                 }
             }
@@ -117,7 +122,7 @@ public class PDF2TxtPos {
         }
     }
 
-    protected static void parseFile(String pdfFile, boolean bVerticalLines) throws Exception {
+    protected static void parseFile(String pdfFile, boolean bVerticalLines, String sep) throws Exception {
         
         String baseFilename = pdfFile.substring(0, pdfFile.lastIndexOf('.'));
         String txtposFilename = baseFilename + ".info";
@@ -211,14 +216,14 @@ public class PDF2TxtPos {
                         }
                     }
                 }
-                final String sep=";";
+                final String infoSep=";";
                 for(Map.Entry<Integer,List<WordPosition>> kv: lines.entrySet()) {
                     List<WordPosition> line = kv.getValue();
                     
                     for (WordPosition word : line) {
-                        txtposWriter.write(Integer.toString(pageNb) + sep);
-                        txtposWriter.write(Integer.toString(word.getLineNb()) + sep);
-                        txtposWriter.write(word.toString(sep));
+                        txtposWriter.write(Integer.toString(pageNb) + infoSep);
+                        txtposWriter.write(Integer.toString(word.getLineNb()) + infoSep);
+                        txtposWriter.write(word.toString(infoSep));
                         txtposWriter.write("\n");
                     }
                 }
@@ -242,7 +247,7 @@ public class PDF2TxtPos {
                     String[][] csv = g.csv(ll,bVerticalLines);
                     for (String[] row : csv) {
                         for (String s : row) {
-                            gridWriter.write(s + ";");
+                            gridWriter.write(s + sep);
                         }
                         gridWriter.write("\n");   
                     }
