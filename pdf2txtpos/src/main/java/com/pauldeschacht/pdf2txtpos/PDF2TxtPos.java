@@ -133,13 +133,16 @@ public class PDF2TxtPos {
         FileWriter txtposFW = new FileWriter(txtposFile.getAbsoluteFile());
         BufferedWriter txtposWriter = new BufferedWriter(txtposFW);
         
-        String gridFilename = baseFilename + ".csv";
-        File gridFile = new File(gridFilename);
-        if (!gridFile.exists()) {
-            gridFile.createNewFile();
+        BufferedWriter gridWriter = null;
+        if (bVerticalLines == true) {
+            String gridFilename = baseFilename + ".csv";
+            File gridFile = new File(gridFilename);
+            if (!gridFile.exists()) {
+                gridFile.createNewFile();
+            }
+            FileWriter gridFW = new FileWriter(gridFile.getAbsoluteFile());
+            gridWriter = new BufferedWriter(gridFW);
         }
-        FileWriter gridFW = new FileWriter(gridFile.getAbsoluteFile());
-        BufferedWriter gridWriter = new BufferedWriter(gridFW);
         
         
 
@@ -229,30 +232,33 @@ public class PDF2TxtPos {
                 }
                 txtposWriter.flush();
                 
-                // GRID approach
-                //String baseFilename = pdfFile.substring(0, pdfFile.lastIndexOf('.'));
-                PageGridDrawer gridDrawer = new PageGridDrawer();
-                PDPage page = (PDPage)pages.get(pageNb-1);
-                gridDrawer.drawPage(page);
                 
-                List<WordPosition> ll = new ArrayList<WordPosition>();
-                for(Map.Entry<Integer,List<WordPosition>> kv: lines.entrySet()) {
-                    List<WordPosition> line = kv.getValue();
-                    for(WordPosition wp: line) {
-                        ll.add(wp);
-                    }
-                }
-                List<Grid> grids = gridDrawer.getGrids();
-                for(Grid g : grids) {
-                    String[][] csv = g.csv(ll,bVerticalLines);
-                    for (String[] row : csv) {
-                        for (String s : row) {
-                            gridWriter.write(s + sep);
+                if (bVerticalLines == true) {
+                    // GRID approach
+                    //String baseFilename = pdfFile.substring(0, pdfFile.lastIndexOf('.'));
+                    PageGridDrawer gridDrawer = new PageGridDrawer();
+                    PDPage page = (PDPage)pages.get(pageNb-1);
+                    gridDrawer.drawPage(page);
+
+                    List<WordPosition> ll = new ArrayList<WordPosition>();
+                    for(Map.Entry<Integer,List<WordPosition>> kv: lines.entrySet()) {
+                        List<WordPosition> line = kv.getValue();
+                        for(WordPosition wp: line) {
+                            ll.add(wp);
                         }
-                        gridWriter.write("\n");   
                     }
+                    List<Grid> grids = gridDrawer.getGrids();
+                    for(Grid g : grids) {
+                        String[][] csv = g.csv(ll,bVerticalLines);
+                        for (String[] row : csv) {
+                            for (String s : row) {
+                                gridWriter.write(s + sep);
+                            }
+                            gridWriter.write("\n");   
+                        }
+                    }
+                    gridWriter.flush();
                 }
-                gridWriter.flush();
             }
         }
         catch (IOException e) {

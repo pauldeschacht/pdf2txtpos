@@ -19,12 +19,17 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+
+/**
+ */
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -35,9 +40,6 @@ import org.apache.pdfbox.util.Matrix;
 import org.apache.pdfbox.util.PDFStreamEngine;
 import org.apache.pdfbox.util.ResourceLoader;
 
-
-/**
- */
 public class PageGridDrawer extends PDFStreamEngine
 {
     /**
@@ -79,12 +81,15 @@ public class PageGridDrawer extends PDFStreamEngine
      */
     public PageGridDrawer() throws IOException
     {
-	//super( ResourceLoader.loadProperties("org/pauldeschacht/pdfgrid/resources/GridDrawer.properties", true ) );
 	super( ResourceLoader.loadProperties("com/pauldeschacht/pdf2txtpos/GridDrawer.properties", true ) );
+	//super( ResourceLoader.loadProperties("org/pauldeschacht/pdfgrid/resources/GridDrawer.properties", true ) );
 	_closedPath = false;
 	_currentPath = new ArrayList<Line>();
 	_path = new ArrayList<Line>();
 	_pageAffineTransform = null;
+        
+        Logger.getLogger("org.apache.pdfbox.util.PDFStreamEngine").setLevel(Level.OFF);
+
     }
 
     /**
